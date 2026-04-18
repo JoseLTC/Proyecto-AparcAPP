@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ParkingShare MVP</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>ParkingShare</h1>
+      <div id="car-form">
+        <input id="brand" placeholder="Marca" />
+        <input id="model" placeholder="Modelo" />
+        <button id="save-car">Guardar coche</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="map" style="height:70vh"></div>
+      <div id="controls">
+        <button id="mark-occupied">Marcar ocupado</button>
+        <button id="mark-free">Marcar libre</button>
+        <input id="address" placeholder="Buscar dirección" />
+        <button id="search">Buscar</button>
+      </div>
+    </main>
+
+    <footer>
+      <small>Permite ubicación para centrar el mapa</small>
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
