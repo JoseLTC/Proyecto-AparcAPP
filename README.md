@@ -1,4 +1,5 @@
-# ParkingShare — Versión 1  
+# ParkingShare — Versión 2
+Actulización de la versión 1 con una nueva interfaz y mejora en todas las funcionalidades.  
 Sistema básico para gestionar y visualizar plazas de aparcamiento en tiempo real.
 
 Incluye:
@@ -37,7 +38,7 @@ Incluye:
 ## Estructura del proyecto
 
 ```
-PROYECTOV1/
+proyecto/
 │
 ├── backend/
 │   ├── main.py
@@ -62,7 +63,7 @@ PROYECTOV1/
 ### 1.-Crear entorno virtual
 
 ```
-cd C:\Proyectov1\backend> 
+cd C:\proyecto\backend> 
 ```
 
 ```
@@ -71,14 +72,14 @@ python -m venv venv
 
 ### 2.-Activar entorno virtual 
 
-### En C:\Proyectov1\backend>
+### En C:\proyecto\backend>
 ```
 .\venv\Scripts\Activate.ps1
 
 ``` 
 ### 3.-Instalar dependencias
 
-### Desde (venv) C:\Proyectov1\backend>
+### Desde (venv) C:\proyecto\backend>
 
 ``` 
 pip install -r requirements.txt
@@ -87,7 +88,7 @@ pip install -r requirements.txt
 
 ### 4.-Activar Backend
 
-### Desde (venv) C:\Proyectov1\backend>
+### Desde (venv) C:\proyecto\backend>
 
 ``` 
 hypercorn main:app --reload
@@ -106,4 +107,4 @@ PS C:\proyecto\fronted> python -m http.server 5500
 
 ### Ya puedes acceder a la aplicación
 
-![alt text](image.png)
+![alt text](app.png)

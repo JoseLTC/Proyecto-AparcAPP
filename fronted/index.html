@@ -1,36 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ParkingShare MVP</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="UTF-8" />
+  <title>AparcApp</title>
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <link rel="stylesheet" href="style.css">
+
+  
 </head>
+
 <body>
-  <div id="app">
-    <header>
-      <h1>ParkingShare</h1>
-      <div id="car-form">
-        <input id="brand" placeholder="Marca" />
-        <input id="model" placeholder="Modelo" />
-        <button id="save-car">Guardar coche</button>
-      </div>
-    </header>
+  <div class="container">
+    <img src="AparcApp.png" alt="Logo AparcApp" class="logo">
 
-    <main>
-      <div id="map" style="height:70vh"></div>
-      <div id="controls">
-        <button id="mark-occupied">Marcar ocupado</button>
-        <button id="mark-free">Marcar libre</button>
-        <input id="address" placeholder="Buscar dirección" />
-        <button id="search">Buscar</button>
-      </div>
-    </main>
+    <!-- Datos del coche -->
+    <div class="card-input">
+      <label>Marca del vehículo</label>
+      <input type="text" id="brand" placeholder="Ej: Opel">
+    </div>
 
-    <footer>
-      <small>Permite ubicación para centrar el mapa</small>
-    </footer>
+        <!-- Modal mensajes del sistema -->
+    <div id="system-modal-overlay">
+      <div id="system-modal">
+        <p id="system-modal-text"></p>
+        <button id="close-system-modal">Cerrar</button>
+      </div>
+    </div>
+
+  
+
+    <div class="card-input">
+      <label>Modelo del vehículo</label>
+      <input type="text" id="model" placeholder="Ej: Astra">
+    </div>
+
+
+    <button id="save-car">Guardar coche</button>
+
+    <!-- NUEVO: botón Elegir coche -->
+    <button id="choose-car">Elegir coche</button>
+
+    <!-- Acciones de plaza -->
+    <div class="field-group buttons-inline">
+      <button id="mark-occupied">Marcar ocupado</button>
+      <button id="mark-free">Marcar libre</button>
+    </div>
+
+    <!-- Buscar plaza -->
+    <button id="find-spot">Buscar plaza</button>
+
+    <!-- Sección de búsqueda -->
+    <div id="search-section">
+      <div class="field-group">
+        <label for="address">
+          Introduce la dirección a buscar.<br>
+          <small>(Debes seguir el siguiente modelo → Calle, Provincia)</small>
+        </label>
+        <input type="text" id="address" placeholder="Ej: Calle San Cristóbal, Plasencia" />
+      </div>
+      <button id="search">Buscar</button>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <!-- Modal plazas libres -->
+  <div id="modal-overlay">
+    <div id="modal">
+      <h2>Plazas libres cercanas</h2>
+      <p id="modal-summary"></p>
+      <ul id="modal-list"></ul>
+      <button id="close-modal">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal acciones -->
+  <div id="action-modal-overlay">
+    <div id="action-modal">
+      <h2 id="action-title"></h2>
+      <p id="action-text"></p>
+      <button id="close-action-modal">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- NUEVO: Modal Mis coches -->
+  <div id="cars-modal-overlay">
+    <div id="cars-modal">
+      <h2>Mis coches</h2>
+      <ul id="cars-list"></ul>
+      <button id="close-cars-modal">Cerrar</button>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

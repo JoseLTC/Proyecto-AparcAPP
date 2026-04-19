@@ -1,134 +1,165 @@
 import json
 import asyncio
-from datetime import datetime
-from typing import List, Optional
-
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import SQLModel, Session, create_engine, select
+from sqlmodel import SQLModel, Session, create_engine, select, Field
+from datetime import datetime
+from typing import List, Optional
+from models import Spot, Car
 
-from models import Spot
-
+# ---------------------------------------------------------
+# BASE DE DATOS
+# ---------------------------------------------------------
 DATABASE_URL = "sqlite:///./spots.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-app = FastAPI(title="ParkingShare MVP")
+app = FastAPI(title="ApparcApp")
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Create DB
-SQLModel.metadata.create_all(engine)
+
+# Crear tablas
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
 
 
-# -------------------------
-# WebSocket Manager
-# -------------------------
+# ---------------------------------------------------------
+# WEBSOCKET MANAGER
+# ---------------------------------------------------------
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
 
-    async def connect(self, ws: WebSocket):
-        await ws.accept()
-        self.active_connections.append(ws)
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
 
-    def disconnect(self, ws: WebSocket):
-        if ws in self.active_connections:
-            self.active_connections.remove(ws)
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
 
     async def broadcast(self, message: dict):
-        data = json.dumps(message, default=str)
+        data = json.dumps(message)
         for connection in list(self.active_connections):
             try:
                 await connection.send_text(data)
-            except Exception:
+            except WebSocketDisconnect:
                 self.disconnect(connection)
 
 
 manager = ConnectionManager()
 
 
-# -------------------------
-# REST Endpoints
-# -------------------------
-@app.post("/spots", response_model=Spot)
-def create_or_update_spot(spot: Spot):
-    with Session(engine) as session:
-        stmt = select(Spot)
-        spots = session.exec(stmt).all()
-
-        # naive proximity check (within ~10 meters)
-        for s in spots:
-            if abs(s.lat - spot.lat) < 0.0001 and abs(s.lng - spot.lng) < 0.0001:
-                s.state = spot.state
-                s.car_brand = spot.car_brand
-                s.car_model = spot.car_model
-                s.timestamp = datetime.utcnow()
-
-                session.add(s)
-                session.commit()
-                session.refresh(s)
-
-                asyncio.create_task(
-                    manager.broadcast({
-                        "type": "spot_updated",
-                        "spot": s.model_dump()
-                    })
-                )
-                return s
-
-        session.add(spot)
-        session.commit()
-        session.refresh(spot)
-
-        asyncio.create_task(
-            manager.broadcast({
-                "type": "spot_created",
-                "spot": spot.model_dump()
-            })
-        )
-
-        return spot
-
+# ---------------------------------------------------------
+# ENDPOINTS SPOTS
+# ---------------------------------------------------------
 
 @app.get("/spots")
-def list_spots(lat: Optional[float] = None, lng: Optional[float] = None, radius_m: int = 500):
+async def get_spots():
     with Session(engine) as session:
-        stmt = select(Spot)
-        spots = session.exec(stmt).all()
-
-        if lat is None or lng is None:
-            return spots
-
-        deg_radius = radius_m / 111000  # approx
-        filtered = [
-            s for s in spots
-            if abs(s.lat - lat) <= deg_radius and abs(s.lng - lng) <= deg_radius
-        ]
-        return filtered
+        spots = session.exec(select(Spot)).all()
+        return spots
 
 
-@app.get("/spots/{spot_id}", response_model=Spot)
-def get_spot(spot_id: int):
+@app.post("/spots")
+async def create_or_update_spot(spot: Spot):
     with Session(engine) as session:
-        s = session.get(Spot, spot_id)
-        if not s:
-            raise HTTPException(status_code=404, detail="Spot not found")
-        return s
+        s = session.get(Spot, spot.id)
+
+        if s:
+            s.status = spot.status
+            s.timestamp = datetime.utcnow().isoformat()
+        else:
+            if spot.lat is None or spot.lng is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="lat and lng are required to create a new spot"
+                )
+
+            s = Spot(
+                lat=spot.lat,
+                lng=spot.lng,
+                status=spot.status,
+                car_brand=spot.car_brand,
+                car_model=spot.car_model,
+                timestamp=spot.timestamp
+            )
+            session.add(s)
+
+        session.commit()
+        session.refresh(s)
+
+    asyncio.create_task(
+        manager.broadcast({"type": "spot_updated", "spot": s.dict()})
+    )
+
+    return s
 
 
-# -------------------------
-# WebSocket
-# -------------------------
+# ---------------------------------------------------------
+# ENDPOINTS MIS COCHES
+# ---------------------------------------------------------
+
+@app.get("/cars")
+async def list_cars():
+    with Session(engine) as session:
+        cars = session.exec(select(Car)).all()
+        return cars
+
+
+@app.post("/cars")
+async def create_car(car: Car):
+    with Session(engine) as session:
+
+        # Normalizar para evitar duplicados por mayúsculas/minúsculas
+        brand = car.brand.strip().lower()
+        model = car.model.strip().lower()
+
+        existing = session.exec(
+            select(Car).where(Car.brand == brand, Car.model == model)
+        ).first()
+
+        if existing:
+            return existing  # No crear duplicado
+
+        new_car = Car(brand=brand, model=model)
+        session.add(new_car)
+        session.commit()
+        session.refresh(new_car)
+        return new_car
+
+
+@app.delete("/cars/{car_id}")
+async def delete_car(car_id: int):
+    with Session(engine) as session:
+        car = session.get(Car, car_id)
+        if not car:
+            raise HTTPException(status_code=404, detail="Coche no encontrado")
+
+        session.delete(car)
+        session.commit()
+        return {"status": "deleted"}
+
+
+# ---------------------------------------------------------
+# WEBSOCKET
+# ---------------------------------------------------------
+
 @app.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket):
-    await manager.connect(ws)
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+
     try:
         while True:
-            await ws.receive_text()  # keep alive
+            await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(ws)
+        manager.disconnect(websocket)

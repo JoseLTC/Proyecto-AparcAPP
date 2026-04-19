@@ -1,8 +1,361 @@
-body { font-family: Arial, sans-serif; margin:0; padding:0; }
-header { padding:10px; background:#0b5; color:#fff; display:flex; gap:10px; align-items:center; }
-#car-form input { padding:6px; margin-right:6px; }
-#controls { padding:10px; display:flex; gap:8px; align-items:center; }
-button { padding:8px 12px; border:none; background:#007bff; color:#fff; border-radius:4px; cursor:pointer; }
-button.secondary { background:#28a745; }
-footer { padding:8px; text-align:center; background:#f4f4f4; }
-.leaflet-popup-content-wrapper { font-size:14px; }
+
+#search {
+  width: 100%;
+  padding: 18px 0;
+  background: #455a64;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  margin-top: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: 0.25s ease;
+}
+
+#search:hover {
+  background: #37474f;
+  transform: translateY(-2px);
+}
+
+#find-spot {
+  width: 100%;
+  padding: 16px 0;
+  background: #263238;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  margin-top: 10px;
+  transition: 0.25s ease;
+}
+
+#find-spot:hover {
+  background: #1e272c;
+  transform: scale(1.02);
+}
+
+
+button#search {
+  width: 100%;
+  padding: 18px 0;
+  background: #455a64;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  margin-top: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: 0.25s ease;
+}
+
+button#search:hover {
+  background: #37474f;
+  transform: translateY(-2px);
+}
+
+
+#save-car {
+  width: 100%;
+  padding: 14px 0;
+  font-size: 1rem;
+}
+
+/* Contenedor de los botones ocupado/libre */
+.field-group.buttons-inline {
+  display: flex;
+  gap: 10px;
+}
+
+/* Cada botón ocupa el 50% */
+#mark-occupied,
+#mark-free {
+  flex: 1;
+  padding: 14px 0;
+  font-size: 1rem;
+}
+
+#system-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+#system-modal {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  max-width: 300px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+#close-system-modal {
+  margin-top: 10px;
+  width: 100%;
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.logo {
+  width: 500px;
+  display: block;
+  margin: 10px auto;   
+  transform: translateX(-15px); 
+}
+
+
+.card-input {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 14px;
+  border: 2px solid #1e90ff; 
+  background-color: #f8fbff; 
+}
+
+.card-input label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  text-align: center;
+}
+
+.card-input input {
+  width: 100%;
+  border: none;
+  margin-top: 6px;
+  font-size: 15px;
+  outline: none;
+  
+}
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .field-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 6px 8px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 8px 10px;
+      margin: 4px 2px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    #save-car {
+      background: #1976d2;
+      color: white;
+      width: 100%;
+    }
+
+    /* NUEVO: botón Elegir coche */
+    #choose-car {
+      background: #37474f;
+      color: white;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    #mark-occupied {
+      background: #d32f2f;
+      color: white;
+    }
+
+    #mark-free {
+      background: #388e3c;
+      color: white;
+    }
+
+    /* Botones ocupan 50% cada uno */
+    .buttons-inline {
+      display: flex;
+      gap: 10px;
+    }
+
+    .buttons-inline button {
+      flex: 1;
+      padding: 14px 0;
+      font-size: 1rem;
+    }
+
+    #find-spot {
+      background: #455a64;
+      color: white;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    #search-section {
+      margin-top: 12px;
+      display: none;
+    }
+
+    #map {
+      width: 100%;
+      height: 320px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* Modal plazas libres */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    #modal {
+      background: white;
+      padding: 16px;
+      border-radius: 6px;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    #modal h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    #modal ul {
+      padding-left: 18px;
+    }
+
+    #close-modal {
+      margin-top: 10px;
+      background: #1976d2;
+      color: white;
+      width: 100%;
+    }
+
+    /* Modal acciones */
+    #action-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #action-modal {
+      background: white;
+      padding: 16px;
+      border-radius: 6px;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    #close-action-modal {
+      margin-top: 10px;
+      background: #1976d2;
+      color: white;
+      width: 100%;
+      border: none;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    small {
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+    /* NUEVO: Modal Mis coches */
+    #cars-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+
+    #cars-modal {
+      background: white;
+      padding: 16px;
+      border-radius: 6px;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    #cars-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 10px 0;
+    }
+
+    #cars-list li {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    #cars-list li:hover {
+      background: #f0f0f0;
+    }
+
+    #close-cars-modal {
+      width: 100%;
+      background: #1976d2;
+      color: white;
+      padding: 8px;
+      border-radius: 4px;
+    }
