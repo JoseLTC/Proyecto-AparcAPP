@@ -1,4 +1,4 @@
-# ParkingShare — Versión 2
+# AparcAPP — Versión 2
 Actulización de la versión 1 con una nueva interfaz y mejora en todas las funcionalidades.  
 Sistema básico para gestionar y visualizar plazas de aparcamiento en tiempo real.
 
