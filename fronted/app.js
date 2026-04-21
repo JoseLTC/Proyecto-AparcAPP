@@ -141,6 +141,9 @@ function renderSpots(spots) {
 // ---------------------------------------------------------
 // MARCAR PLAZA COMO OCUPADA O LIBRE (CON DIRECCIÓN)
 // ---------------------------------------------------------
+
+let lastStateWasOccupied = false;
+
 async function markSpot(state) {
   if (!navigator.geolocation) {
     alert("Geolocalización no disponible");
@@ -150,8 +153,21 @@ async function markSpot(state) {
   navigator.geolocation.getCurrentPosition(async pos => {
     const { latitude, longitude } = pos.coords;
 
-    const brand = localStorage.getItem("car_brand") || "";
-    const model = localStorage.getItem("car_model") || "";
+    // LEER DESDE LOS INPUTS, NO DESDE LOCALSTORAGE
+    const brand = document.getElementById("brand").value.trim();
+    const model = document.getElementById("model").value.trim();
+
+    // VALIDACIÓN 1: obligar a elegir coche antes de marcar ocupado
+    if (state === "occupied" && (!brand || !model)) {
+      showActionModal("Error", "Debes seleccionar un coche antes de marcar como ocupado.");
+      return;
+    }
+
+    // VALIDACIÓN 2: obligar a haber marcado ocupado antes de marcar libre
+    if (state === "free" && !lastStateWasOccupied) {
+      showActionModal("Error", "Primero debes marcar la plaza como ocupada.");
+      return;
+    }
 
     let direccion = "Ubicación desconocida";
     try {
@@ -180,11 +196,13 @@ async function markSpot(state) {
     });
 
     if (state === "occupied") {
+      lastStateWasOccupied = true;
       showActionModal(
         "Plaza marcada como ocupada",
         `Su coche ha sido aparcado en:<br><br><b>${direccion}</b>`
       );
     } else {
+      lastStateWasOccupied = false;
       showActionModal(
         "Plaza liberada",
         "Ha liberado su plaza correctamente."
